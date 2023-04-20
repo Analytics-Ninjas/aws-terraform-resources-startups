@@ -66,10 +66,10 @@ resource "aws_security_group" "bastion_sg" {
   }
 
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 }
@@ -81,7 +81,7 @@ resource "tls_private_key" "pk" {
 }
 
 resource "aws_key_pair" "kp" {
-  key_name   = "my_key_pair"       # Create "myKey" to AWS!!
+  key_name   = "my_key_pair" # Create "myKey" to AWS!!
   public_key = tls_private_key.pk.public_key_openssh
 
   provisioner "local-exec" { # Create "myKey.pem" to your computer!!
@@ -115,8 +115,8 @@ resource "aws_security_group" "rds_sg" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion_sg.id]
   }
@@ -124,19 +124,19 @@ resource "aws_security_group" "rds_sg" {
 
 resource "aws_db_instance" "my_db_instance" {
   identifier             = "my-db-instance"
-  engine                 = "postgres"
-  engine_version         = "14.6"
+  engine                 = "mysql"
+  engine_version         = "8.0.32"
   instance_class         = "db.t3.micro"
   allocated_storage      = 20
   storage_type           = "gp2"
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group_1.name
   publicly_accessible    = false
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  username               = "postgres"
-  password               = "postgres"
-  db_name                = "postgres"
-  port                   = 5432
-  skip_final_snapshot     = true
+  username               = "admin"
+  password               = "password"
+  db_name                = "stock_db"
+  port                   = 3306
+  skip_final_snapshot    = true
   multi_az               = false
 }
 
@@ -144,7 +144,7 @@ resource "aws_db_instance" "my_db_instance" {
 resource "random_string" "bucket_suffix" {
   length  = 6
   special = false
-  upper = false
+  upper   = false
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
@@ -157,7 +157,7 @@ output "aws_instance_public_ip" {
 }
 
 output "aws_rds" {
-  value = aws_db_instance.my_db_instance.address  
+  value = aws_db_instance.my_db_instance.address
 }
 
 output "aws_s3_bucket_name" {

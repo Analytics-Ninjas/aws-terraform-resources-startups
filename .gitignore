@@ -4,3 +4,5 @@
 terraform.*
 terraform.*.*
 .terraform.*
+*.pem
+*.ppk
